@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import BookList from "../components/BookList";
 import MySelect from "../components/UI/MySelect/MySelect";
+import NotFound from "../components/UI/NotFound/NotFound";
 import FakeBookApi from "../data/FakeBookApi";
 
 const MainPage = () => {
@@ -12,42 +13,47 @@ const MainPage = () => {
     });
   };
 
-  const sortedBooks = useMemo(
-    (sort) => {
-      if (books.length) {
-        return [...books].filter((obj) => obj.department === sort);
-      } else {
-        return books;
-      }
-    },
-    [books]
-  );
+  const sortedBooks = useMemo(() => {
+    if (selectedSort) {
+      const sortedData = [...books].filter((item) =>
+        selectedSort ? (
+          [...books].some((key) => item[selectedSort])
+        ) : (
+          <NotFound />
+        )
+      );
+
+      console.log(sortedData);
+      return sortedData;
+    }
+    return books;
+  }, [books, selectedSort]);
 
   const sortBooks = (sort) => {
-    setBooks(
-      [...books].filter((a) =>
-        a.author.toLowerCase().includes(sort.toLowerCase())
-      )
+    setSelectedSort(
+      sort.map((s) => {
+        return s.value;
+      })
     );
   };
 
   useEffect(() => {
     fetchBooks();
-  });
+  }, []);
 
   return (
     <div>
-      <div className="App">
-        <BookList books={books} />
+      <div className="mainpage_container">
+        <BookList books={sortedBooks} />
         <MySelect
           value={selectedSort}
           defaultValue="Sort books"
-          onChange={sortBooks}
+          onChangeVal={sortBooks}
           options={[
-            { value: "author", name: "By Author" },
-            { value: "publishingHouse", name: "By publishing house" },
-            { value: "Administration", name: "By Administraton" },
-            { value: "", name: "Clear" },
+            { value: "title", label: "Title" },
+            { value: "author", label: "Author" },
+            { value: "publishingHouse", label: "Publishing house" },
+            { value: "pages", label: "Pages" },
           ]}
         />
       </div>
